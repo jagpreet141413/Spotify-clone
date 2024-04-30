@@ -1,4 +1,5 @@
 let songs;
+let index;
 let currFolder;
 let currentSong = new Audio();
 const play = document.getElementById("play");
@@ -65,43 +66,45 @@ const playMusic = (track, pause = false) => {
   document.querySelector(".songtime").innerHTML = "00:00 / 00:00";
 };
 
+// Assuming cardContainer is defined somewhere in your HTML or JavaScript code
+
 async function displayAlbums() {
   let a = await fetch(`http://127.0.0.1:3000/songs/`);
   let response = await a.text();
   let div = document.createElement("div");
   div.innerHTML = response;
   let anchors = div.getElementsByTagName("a");
-  let cardContainer = document.querySelector(`.cardContainer`);
-  let array = Array.from(anchors);
-  for (let index = 0; index < array.length; index++) {
-    const e = array[index];
+  let cardContainer = document.querySelector(".cardContainer");
+  Array.from(anchors).forEach(async (e) => {
     if (e.href.includes("/songs")) {
-      let folder = e.href.split("/").slice(-2)[0];
-      // get meta data of the folder
+      let folder = e.href.split("/").slice(-1)[0];
       let a = await fetch(`http://127.0.0.1:3000/songs/${folder}/info.json`);
       let response = await a.json();
       cardContainer.innerHTML =
         cardContainer.innerHTML +
         `<div data-folder=${folder} class="card ">
-    <div class="play"> <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
-            viewBox="0 0 24 24" fill="none">
-            <path d="M5 20V4L19 12L5 20Z" stroke="#141B34" fill="#000" stroke-width="1.5"
-                stroke-linejoin="round" />
-        </svg>
-    </div>
-    <img src="/songs/${folder}/cover.jpg" alt="">
-    <h2>${response.title}</h2>
-    <p>${response.description}</p>
-</div>`;
+            <div class="play"> 
+                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 20V4L19 12L5 20Z" stroke="#141B34" fill="#000" stroke-width="1.5" stroke-linejoin="round" />
+                </svg>
+            </div>
+            <img src="/songs/${folder}/cover.jpg" alt="">
+            <h2>${response.title}</h2>
+            <p>${response.description}</p>
+        </div>`;
+      // load the playlist whenever card is clicked
+      Array.from(document.getElementsByClassName("card")).forEach((e) => {
+        e.addEventListener("click", async (item) => {
+          await getSongs(`songs/${item.currentTarget.dataset.folder}`);
+          // Now that songs are loaded, you can safely use the songs array
+          // For example, you can call playMusic here
+          // playMusic(songs[0], true);
+        });
+      });
     }
-  }
-  // load the playlist whenever card is clicked
-  Array.from(document.getElementsByClassName("card")).forEach((e) => {
-    e.addEventListener("click", async (item) => {
-      songs = await getSongs(`songs/${item.currentTarget.dataset.folder}`);
-    });
   });
 }
+
 async function main() {
   // get the list of all the songs
   await getSongs("songs/ncs");
@@ -158,8 +161,11 @@ async function main() {
     let index = songs.indexOf(currentSong.src.split("/").slice(-1)[0]);
     if (index - 1 >= 0) {
       playMusic(songs[index - 1]);
+      console.log(songs);
+      console.log(currentSong.src);
     }
   });
+
   // add event listener for next
   next.addEventListener("click", () => {
     currentSong.pause();
