@@ -15,7 +15,7 @@ function convertToMinutesSeconds(milliseconds) {
 
 async function getSongs(folder) {
   currFolder = folder;
-  let a = await fetch(`http://127.0.0.1:3000/${currFolder}/`);
+  let a = await fetch(`https://jagpreet141413.github.io/Spotify-clone/${currFolder}/`);
   let response = await a.text();
   let div = document.createElement("div");
   div.innerHTML = response;
@@ -69,7 +69,7 @@ const playMusic = (track, pause = false) => {
 // Assuming cardContainer is defined somewhere in your HTML or JavaScript code
 
 async function displayAlbums() {
-  let a = await fetch(`http://127.0.0.1:3000/songs/`);
+  let a = await fetch(`https://jagpreet141413.github.io/Spotify-clone/songs/`);
   let response = await a.text();
   let div = document.createElement("div");
   div.innerHTML = response;
